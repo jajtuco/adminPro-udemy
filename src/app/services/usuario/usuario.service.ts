@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Usuario } from 'src/app/models/usuario.model';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { URL_SERVICIOS } from '../../config/config';
 import { map } from 'rxjs/operators';
 import swal from 'sweetalert2';
@@ -22,7 +22,7 @@ export class UsuarioService {
     public subirArchivoService: SubirArchivoService) {
 
     this.cargarStorage();
-    
+
   }
 
   estaLogueado() {
@@ -128,48 +128,77 @@ export class UsuarioService {
     return this.http.put(url, usuario)
       .pipe(map(
         (resp: any) => {
-        
-        const usuarioDB: Usuario = resp.usuario;
-        
-        this.guardarStorage( usuarioDB._id, this.token, usuarioDB);
+
+
+          if( usuario._id === this.usuario._id){
+            const usuarioDB: Usuario = resp.usuario;
+            this.guardarStorage(usuarioDB._id, this.token, usuarioDB);
+          }
+
+
+          swal.fire({
+            title: 'Usuario actualizado',
+            text: usuario.nombre,
+            icon: 'success'
+          });
+
+
+          return true;
+        }));
+
+
+  }
+
+
+  cambiarImagen(archivo: File, id: string) {
+
+    this.subirArchivoService.subirArchivo(archivo, 'usuarios', id)
+      .then((resp: any) => {
+
+        this.usuario.img = resp.usuario.img;
 
         swal.fire({
-          title: 'Usuario actualizado',
-          text: usuarioDB.nombre,
+          title: 'Imagen actualizada',
+          text: this.usuario.nombre,
           icon: 'success'
         });
 
+        this.guardarStorage(id, this.token, this.usuario);
 
-        return true;
-      }));
+      }).catch(resp => {
+        console.log(resp);
 
-
-  }
-
-
-  cambiarImagen( archivo: File, id: string){
-
-    this.subirArchivoService.subirArchivo( archivo, 'usuarios', id )
-    .then( (resp: any) => {
-
-      this.usuario.img = resp.usuario.img;
-
-      swal.fire({
-        title: 'Imagen actualizada',
-        text: this.usuario.nombre,
-        icon: 'success'
       });
 
-      this.guardarStorage(id, this.token, this.usuario);
-      
-    }).catch( resp => {
-      console.log(resp);
-      
-    });
-
 
   }
 
+  cargarUsuarios(desde: number = 0) {
+
+    let url = URL_SERVICIOS + '/usuario?desde=' + desde;
+
+    return this.http.get(url);
+
+  }
+
+  buscarUsuario(termino: string) {
+
+    let url = URL_SERVICIOS + '/busqueda/coleccion/usuarios/' + termino;
+
+    return this.http.get(url)
+      .pipe(map((resp: any) => resp.usuarios
+      ));
+  }
+
+
+  borrarUsuario( id: string ){
+
+    let url = URL_SERVICIOS + '/usuario/' + id;
+    url +=  '?token=' + this.token;
+    
+    return this.http.delete( url );
+
+  }
 
 
 }
