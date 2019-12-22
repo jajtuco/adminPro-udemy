@@ -33,7 +33,6 @@ export class ImagenPipe implements PipeTransform {
         break;
 
       default:
-        console.log("tipo de imagen no existe, usuarios, medicos, hospitales");
         url += '/usuarios/noimg';
         break;
     }

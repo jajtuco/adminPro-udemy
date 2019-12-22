@@ -129,7 +129,6 @@ export class UsuariosComponent implements OnInit {
     this.usuarioService.actualizarUsuario(usuario)
     .subscribe();
 
-
   }
 
 
