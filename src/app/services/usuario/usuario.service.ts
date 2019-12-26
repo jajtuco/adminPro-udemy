@@ -29,6 +29,32 @@ export class UsuarioService {
 
   }
 
+  renuevaToken() {
+    let url = URL_SERVICIOS + '/login/renuevaToken';
+    url += '?token=' + this.token;
+
+    return this.http.get(url)
+      .pipe(map((resp: any) => {
+
+        this.token = resp.token;
+        localStorage.setItem('token', this.token);
+
+        return true;
+      }),
+        catchError(err => {
+
+          swal.fire({
+            title: 'No se pudo renovar token',
+            text: 'No fue posible renovar token',
+            icon: 'error'
+          });
+          this.router.navigate(['/login']);
+
+          return throwError(err);
+        })
+      );
+  }
+
   estaLogueado() {
 
     return (this.token.length > 5) ? true : false;
@@ -108,14 +134,14 @@ export class UsuarioService {
 
           return true;
         }),
-        catchError( err => {
-          
+        catchError(err => {
+
           swal.fire({
             title: 'Error en login',
             text: err.error.mensaje,
             icon: 'error'
           });
-          
+
           return throwError(err);
         })
       );
@@ -137,18 +163,18 @@ export class UsuarioService {
           });
           return resp.usuario;
         }),
-        catchError( err => {
-          
+        catchError(err => {
+
           swal.fire({
             title: err.error.mensaje,
             text: err.error.errors.message,
             icon: 'error'
           });
-          
+
           return throwError(err);
         })
 
-        );
+      );
 
 
   }
@@ -163,7 +189,7 @@ export class UsuarioService {
         (resp: any) => {
 
 
-          if( usuario._id === this.usuario._id){
+          if (usuario._id === this.usuario._id) {
             const usuarioDB: Usuario = resp.usuario;
             this.guardarStorage(usuarioDB._id, this.token, usuarioDB, this.menu);
           }
@@ -178,14 +204,14 @@ export class UsuarioService {
 
           return true;
         }),
-        catchError( err => {
-          
+        catchError(err => {
+
           swal.fire({
             title: err.error.mensaje,
             text: err.error.errors.message,
             icon: 'error'
           });
-          
+
           return throwError(err);
         }));
 
@@ -234,12 +260,12 @@ export class UsuarioService {
   }
 
 
-  borrarUsuario( id: string ){
+  borrarUsuario(id: string) {
 
     let url = URL_SERVICIOS + '/usuario/' + id;
-    url +=  '?token=' + this.token;
-    
-    return this.http.delete( url );
+    url += '?token=' + this.token;
+
+    return this.http.delete(url);
 
   }
 
